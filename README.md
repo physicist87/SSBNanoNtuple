@@ -24,9 +24,9 @@ Set the appropriate architecture for your system:
   ```bash
   export SCRAM_ARCH=slc7_amd64_gcc12
   ```
-- **For lxplus**:
+- **For lxplus or KISTI**:
   ```bash
-  export SCRAM_ARCH=el8_amd64_gcc12
+  export SCRAM_ARCH=el9_amd64_gcc12
   ```
 
 ### **4. Create and Initialize CMSSW Environment**
