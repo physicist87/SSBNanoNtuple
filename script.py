@@ -1,6 +1,7 @@
 import os
 import shutil
 import argparse
+import socket # socket 
 
 def create_crab_config(sub_dir, short_name, input_dataset, run_period, file_type, user_id, work_name):
     """
@@ -20,6 +21,21 @@ def create_crab_config(sub_dir, short_name, input_dataset, run_period, file_type
     branchlist_file = f"branchlist_Run2_{file_type}.txt"
     # Include WorkName in the output directory path
     out_lfn_dir = f"/store/user/{user_id}/UL20NanoAOD/{work_name}/{run_period}/{file_type}/"
+
+    # --- Add server detection logic ---
+    hostname = socket.gethostname()
+    hostname_lower = hostname.lower()
+
+    if "sdfarm.kr" in hostname_lower or "ui10" in hostname_lower: # KISTI server detection based on hostname
+        storage_site = "T3_KR_KISTI"
+        print(f"Detected KISTI server ({hostname}). Setting storage site to {storage_site}")
+    elif "knu.ac.kr" in hostname_lower or "knu" in hostname_lower: # KNU server detection based on hostname
+        storage_site = "T3_KR_KNU"
+        print(f"Detected KNU server ({hostname}). Setting storage site to {storage_site}")
+    else: # Default or unknown server
+        storage_site = "T3_KR_KNU" # You might want to make this configurable or raise an error for unknown
+        print(f"Detected unknown server ({hostname}). Defaulting storage site to {storage_site}. Please verify if this is correct.")
+    # --- End of server detection logic ---
 
     config_content = f"""from WMCore.Configuration import Configuration
 
@@ -46,7 +62,7 @@ config.Data.publication = False
 config.Data.outputDatasetTag = '{short_name}'  # short name
 
 config.section_("Site")
-config.Site.storageSite = "T3_KR_KNU"
+config.Site.storageSite = "{storage_site}" # Use dynamically determined storage_site
 """
     config_file_path = os.path.join(sub_dir, "crab_config.py")
     with open(config_file_path, 'w') as f:
